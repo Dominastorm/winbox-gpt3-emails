@@ -7,9 +7,9 @@ load_dotenv(dotenv_path=env_path)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
-def openai_create(prompt, temperature):
+def openai_create(prompt, temperature=0.5, model="text-curie-001"):
     response = openai.Completion.create(
-        model="text-curie-001",
+        model=model,
         prompt=prompt,
         temperature=temperature,
         max_tokens=300,
@@ -19,32 +19,14 @@ def openai_create(prompt, temperature):
     )
     return response["choices"][0]["text"]
 
-def generate_subject_lines(topic):
-    lines = openai_create("Provide five subject lines for an email about " + topic, 0.5).split("\n")[2:]
-    return lines
+def generate_email(sender, receiver):
+    subject = openai_create(f"Write a subject line\nSender: {sender}\nReceiver: {receiver}", model="text-davinci-002").strip('\nSubject:')
+    email = openai_create(f"Write an email with greeting and closing line\nSender: {sender}\nReceiver: {receiver}\nSubject: {subject}").lstrip('\n')
+    print(f"To: {receiver}\nFrom: {sender}\nSubject:{subject}\n\n{email}")
+    
 
-def generate_email_body(subject_line, receiver="David"):
-    subject_line = subject_line.lstrip('123456789').lstrip('. ') 
-    prompt ="Write an email body for \nSubject: " + subject_line + "\nTo:" + receiver
-    return openai_create(prompt, 0.5).lstrip('\n')
-
-def generate_email_response(email):
-    prompt = "Write a reply to this email: \n'''\n" + email + "\n'''\n"
-    return openai_create(prompt, 0.5).lstrip('\n')
-
-def generate_email_and_response(topic):
-    lines = generate_subject_lines(topic)
-    print("\nGenerted subject lines:")
-    for line in lines:
-        print(line)
-    subject_line = lines[int(input("\nChoose the subject line that suits you the best: ")) - 1]
-    # generate email body using the subject line
-    email_body = generate_email_body(subject_line)
-    print("\nGenerated email body:\n")
-    print(email_body)
-    # generate response to email using the email
-    email_response = generate_email_response(email_body)
-    print("\nGenerated email response:\n")
-    print(email_response)
-
-generate_email_and_response("Hoverboard")
+def generate_email_and_response(sender, receiver):
+    print("\n\n**************EMAIL****************\n\n")
+    generate_email(sender, receiver)
+    print("\n\n**************RESPONSE****************\n\n")
+    generate_email(receiver, sender)
