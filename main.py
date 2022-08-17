@@ -32,6 +32,10 @@ def generate_greeting_and_closing(sender, receiver):
 
     return greeting, closing
 
+def generate_subject(email_content):
+    # generate subject from email content
+    subject = openai_create(f"Write a short and concise title for the text below\n'''\n{email_content}\n'''\n")
+    return subject.lstrip('Subject:').lstrip(' \n')
 
 def email_builder(sender, receiver):
     # generate content for email and response
@@ -47,7 +51,11 @@ def email_builder(sender, receiver):
     # combine greeting, email content and closing for response
     second_email = f"{second_greeting}\n\n{second_email_content}\n\n{second_closing}"
 
-    return first_email, second_email
+    # generate subject for email
+    first_subject = generate_subject(first_email_content)
+    second_subject = generate_subject(second_email_content)
+
+    return first_email, second_email, first_subject, second_subject
 
 
 def generate_email_content(sender, receiver):
@@ -84,10 +92,9 @@ def generate_email_content(sender, receiver):
 
 
 def print_email_and_response(sender, receiver):
-    first_email, second_email = email_builder(sender, receiver)
+    first_email, second_email, first_subject, second_subject= email_builder(sender, receiver)
     print("\n\n**************EMAIL****************\n\n")
-    print(first_email)    
+    print("Subject: " + first_subject + "\n\n" + first_email)
     print("\n\n**************RESPONSE****************\n\n")
-    print(second_email)
+    print("Subject: " + second_subject + "\n\n" + second_email)
 
-print_email_and_response("Dhruv", "Kushagra")
