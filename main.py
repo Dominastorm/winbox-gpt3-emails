@@ -59,7 +59,7 @@ def email_builder(sender, receiver):
 
 
 def generate_email_content(sender, receiver):
-    text = openai_create(f"Two bots {sender} and {receiver} are in the middle of a discussion. Each speaking in 2 lines.")
+    text = openai_create(f"Two People {sender} and {receiver} are in the middle of a discussion. Each speaking in 2 lines.")
     text = [i.split(":") for i in text.split('\n') if i]
     # check if the conversaation length is 2
     if len(text) == 2:
@@ -98,3 +98,4 @@ def print_email_and_response(sender, receiver):
     print("\n\n**************RESPONSE****************\n\n")
     print("Subject: " + second_subject + "\n\n" + second_email)
 
+print_email_and_response("Dhruv", "Aryan")
