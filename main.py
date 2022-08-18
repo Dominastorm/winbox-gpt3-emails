@@ -39,7 +39,7 @@ def generate_subject(email_content):
 
 def email_builder(sender, receiver):
     # generate content for email and response
-    first_email_content, second_email_content, first_subject, second_subject = generate_email_content(sender, receiver)
+    first_email_content, second_email_content, first_subject = generate_email_content(sender, receiver)
 
     # generate greeting and closing for email
     first_greeting, first_closing = generate_greeting_and_closing(sender, receiver)
@@ -51,7 +51,7 @@ def email_builder(sender, receiver):
     # combine greeting, email content and closing for response
     second_email = f"{second_greeting}\n\n{second_email_content}\n\n{second_closing}"
 
-    return first_email, second_email, first_subject, second_subject
+    return first_email, second_email, first_subject
 
 
 def get_topic():
@@ -73,7 +73,7 @@ def generate_email_content(sender, receiver):
             # extract dialogue from text
             first_email_content = text[0][1].lstrip(' ')
             second_email_content = text[1][1].lstrip(' ')
-            return first_email_content, second_email_content, topic, "Re: " + topic
+            return first_email_content, second_email_content, topic
         # regenerate if the conversation is not in the correct format
         else:
             return generate_email_content(sender, receiver)
@@ -87,7 +87,7 @@ def generate_email_content(sender, receiver):
             # extract dialogue from text
             first_email_content = text[1][0].lstrip(' ')
             second_email_content = text[3][0].lstrip(' ')
-            return first_email_content, second_email_content, topic, "Re: " + topic
+            return first_email_content, second_email_content, topic
         # regenerate if the conversation is not in the correct format
         else:
             return generate_email_content(sender, receiver)
@@ -97,10 +97,11 @@ def generate_email_content(sender, receiver):
 
 
 def print_email_and_response(sender, receiver):
-    first_email, second_email, first_subject, second_subject= email_builder(sender, receiver)
+    first_email, second_email, first_subject = email_builder(sender, receiver)
+    print("\n\n" + "Subject: " + first_subject)
     print("\n\n**************EMAIL****************\n\n")
-    print("Subject: " + first_subject + "\n\n" + first_email)
+    print(first_email)
     print("\n\n**************RESPONSE****************\n\n")
-    print("Subject: " + second_subject + "\n\n" + second_email)
+    print(second_email)
 
 print_email_and_response("John", "Jane")
