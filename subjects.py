@@ -21,33 +21,64 @@ def openai_create(prompt, temperature=0.7, model="text-curie-001"):
     )
     return response["choices"][0]["text"]
 
-def topics_generator():
-    all_major_topics = []
-    while len(all_major_topics) < 100:
+
+def major_topics_generator(no_of_topics):
+    # read major topics from file "major_topics.txt"
+    with open('major_topics.txt', 'r') as f:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+        all_major_topics = [topic.rstrip('\n ') for topic in f.readlines()]
+    # storing the index starting from which the topics are generated
+    major_index = len(all_major_topics)
+
+    # generate more detailed topics for each major topic
+    while len(all_major_topics) < no_of_topics:
         topics = openai_create("Generate 100 topics for deep conversation").split('\n')
-        topics = [topic.lstrip('1234567890.) ') for topic in topics if topic]
+        topics = [topic.lstrip('1234567890.) ').rstrip('\n ') for topic in topics if topic]
         topics = [topic for topic in topics if topic not in all_major_topics and len(topic.split(' ')) < 4]
         all_major_topics.extend(topics)
         time.sleep(1)
 
-    # write all the major topics into a file "major_topics.txt"
+    # write all the new major topics into a file "major_topics.txt"
     with open('major_topics.txt', 'a') as f:
-        for topic in all_major_topics:
+        for topic in all_major_topics[major_index:]:
             f.write(topic + '\n')
 
-    all_detailed_topics = []
+
+def detailed_topics_generator():
+    # read detailed topics from file "detailed_topics.txt"
+    with open('detailed_topics.txt', 'r') as f:
+        all_detailed_topics = f.readlines()
+    # storing the index starting from which the topics are generated
+    detailed_index = len(all_detailed_topics)
+
+    # read major topics from file "major_topics.txt"
+    with open('major_topics.txt', 'r') as f:
+        all_major_topics = f.readlines()
+    # since some major topics are also generated in the process, we can store those as well    
+    # store the index starting from which the topics are generated
+    major_index = len(all_major_topics)
+
+    # generate topics with each of the following tones 
+    tones = ['curious', 'urgent', 'excited', 'happy', 'sad', 'angry', 'fearful', 'neutral', 'surprised']
+
     # generate more detailed topics for each major topic
-    for i in all_major_topics:
-        detailed_topics = openai_create(f"Generate 10 topics for deep conversation on {i}").split('\n')
-        detailed_topics = [topic.lstrip('1234567890.) ') for topic in detailed_topics if topic]
-        all_detailed_topics.extend(detailed_topics)
-        time.sleep(1)
+    for topic in all_major_topics:
+        for tone in tones:
+            detailed_topics = openai_create(f"Write 10 sub-topics for {topic} in {tone} statements").split('\n')
+            detailed_topics = [topic.lstrip('1234567890.)- ').strip('\n') for topic in detailed_topics if topic and 5 < len(topic.split(' ')) < 12 and '?' not in topic and topic not in all_detailed_topics]
+            major_topics = [topic.lstrip('1234567890.)- ').strip('\n') for topic in detailed_topics if topic and len(topic.split(' ')) < 4 and '?' not in topic and topic not in all_major_topics]
+            all_detailed_topics.extend(detailed_topics)
+            all_major_topics.extend(major_topics)
+            time.sleep(1)
     
-    # write all the detailed topics into a file "detailed_topics.txt"
+    # write all the new detailed topics into a file "detailed_topics.txt"
     with open('detailed_topics.txt', 'a') as f:
-        for topic in all_detailed_topics:
+        for topic in all_detailed_topics[detailed_index:]:
             f.write(topic + '\n')
 
-    
-    
-topics_generator()
+    # write all the new major topics into a file "major_topics.txt"
+    with open('major_topics.txt', 'a') as f:
+        for topic in all_major_topics[major_index:]:
+            f.write(topic + '\n')
+
+major_topics_generator(300)
+detailed_topics_generator()
