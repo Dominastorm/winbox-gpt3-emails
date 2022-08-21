@@ -1,7 +1,6 @@
 import os
 import openai
 from dotenv import load_dotenv
-import random
 import time
 
 env_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -32,7 +31,7 @@ def major_topics_generator(no_of_topics):
     # generate more detailed topics for each major topic
     while len(all_major_topics) < no_of_topics:
         topics = openai_create("Generate 100 topics for deep conversation").split('\n')
-        topics = [topic.lstrip('1234567890.) ').rstrip('\n ') for topic in topics if topic]
+        topics = [topic.lstrip('1234567890.)- ').rstrip('\n ') for topic in topics if topic]
         topics = [topic for topic in topics if topic not in all_major_topics and len(topic.split(' ')) < 4]
         all_major_topics.extend(topics)
         time.sleep(1)
@@ -55,19 +54,19 @@ def detailed_topics_generator():
         all_major_topics = f.readlines()
     # since some major topics are also generated in the process, we can store those as well    
     # store the index starting from which the topics are generated
-    major_index = len(all_major_topics)
-
+    new_major_topics = []
+    
     # generate topics with each of the following tones 
     tones = ['curious', 'urgent', 'excited', 'happy', 'sad', 'angry', 'fearful', 'neutral', 'surprised']
 
     # generate more detailed topics for each major topic
-    for topic in all_major_topics:
+    for topic in all_major_topics[:1]:
         for tone in tones:
-            detailed_topics = openai_create(f"Write 10 sub-topics for {topic} in {tone} statements").split('\n')
-            detailed_topics = [topic.lstrip('1234567890.)- ').strip('\n') for topic in detailed_topics if topic and 5 < len(topic.split(' ')) < 12 and '?' not in topic and topic not in all_detailed_topics]
-            major_topics = [topic.lstrip('1234567890.)- ').strip('\n') for topic in detailed_topics if topic and len(topic.split(' ')) < 4 and '?' not in topic and topic not in all_major_topics]
+            generated_topics = openai_create(f"Write 10 sub-topics for {topic} in {tone} statements").split('\n')
+            detailed_topics = [topic.lstrip('1234567890.)- ').strip('\n') for topic in generated_topics if topic and 5 < len(topic.split(' ')) < 12 and '?' not in topic and topic not in all_detailed_topics]
+            major_topics = [topic.lstrip('1234567890.)- ').strip('\n') for topic in generated_topics if topic and len(topic.split(' ')) < 5 and '?' not in topic and topic not in all_major_topics]
             all_detailed_topics.extend(detailed_topics)
-            all_major_topics.extend(major_topics)
+            new_major_topics.extend(major_topics)
             time.sleep(1)
     
     # write all the new detailed topics into a file "detailed_topics.txt"
@@ -77,8 +76,7 @@ def detailed_topics_generator():
 
     # write all the new major topics into a file "major_topics.txt"
     with open('major_topics.txt', 'a') as f:
-        for topic in all_major_topics[major_index:]:
+        for topic in new_major_topics:
             f.write(topic + '\n')
 
-major_topics_generator(300)
 detailed_topics_generator()
